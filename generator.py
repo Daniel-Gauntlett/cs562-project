@@ -1,18 +1,77 @@
 import subprocess
 
+# Stuff up here is being put in python format for generation
 
-def main():
+            
+
+
+def main(phi):
+    
     """
     This is the generator code. It should take in the MF structure and generate the code
     needed to run the query. That generated code should be saved to a 
     file (e.g. _generated.py) and then run.
     """
+    S = phi[0]
+    n = phi[1]
+    V = phi[2]
+    FVECT = phi[3]
+    PRED_LIST = phi[4]
+    HAVING = phi[5]
+    groupingvars = ""
+    for i in range(n):
+        groupingvars = groupingvars + f"{S[i - n]} = 0\n"
 
-    body = """
-    for row in cur:
-        if row['quant'] > 10:
-            _global.append(row)
+    body = f"""
+    class struct:
+        def __init__():
+            {S[0]} = [' '] * 50 # not entirely sure where this 50 comes from. also needs handling for multiple basic variables
+            {groupingvars}
+
+    mf_struct = struct()
+    NUM_OF_ENTRIES = 0
+
+    def lookup(cur_row):
+        for i in range(NUM_OF_ENTRIES):
+            if (mf_struct[i].{S[0]} == cur_row.{S[0]}):
+                return i
+        return -1
+
+    def add(cur_row):
+        mf_struct[NUM_OF_ENTRIES].{S[0]} = cur_row.{S[0]}
+        # add handling here for the various quants
+        NUM_OF_ENTRIES = NUM_OF_ENTRIES + 1
+
+    def output():
+        print(". . . . .\n"); # header of the output (from operand S)
+        for i in range(NUM_OF_ENTRIES):
+            print("%s %d %d %d\n", mf_struct[i].{S[0]}, mf_struct[i].count_1_quant, mf_struct[i].sum_2_quant, mf_struct[i].max_3_quant); # replace quant handling here with proper variables
+    # TABLE SCAN 1: populate mf-struct with distinct values of grouping attribute (V)
+    while True:
+        if cur == -1: # i dont actually know how to check if the cursor's at the end of the table
+            break
+        pos = lookup(cur)
+        if pos == -1:
+            add(cur)
+        cur.next() # move to the next row, check how to do that
     """
+
+    for i in range(n):
+        body = body + f"""
+    while True:
+
+        if cur == -1: # i dont actually know how to check if the cursor's at the end of the table
+            break
+        if {PRED_LIST[i]}:
+        
+            # look up current_row.cust in mf_struct
+            pos = lookup(cur, mf_struct)
+            # current_row.cust found in mf_struct
+
+            # handling for necessary quants (sum, max, min, avg, count)
+        
+        cur.next() # move to the next row, check how to do that
+"""
 
     # Note: The f allows formatting with variables.
     #       Also, note the indentation is preserved.
