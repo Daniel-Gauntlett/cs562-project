@@ -6,7 +6,7 @@ import subprocess
 
 
 def main(phi):
-    
+
     """
     This is the generator code. It should take in the MF structure and generate the code
     needed to run the query. That generated code should be saved to a 
@@ -45,9 +45,9 @@ def main(phi):
         NUM_OF_ENTRIES = NUM_OF_ENTRIES + 1
 
     def output():
-        print(". . . . .\n"); # header of the output (from operand S)
+        print(". . . . .\\n"); # header of the output (from operand S)
         for i in range(NUM_OF_ENTRIES):
-            print("%s %d %d %d\n", mf_struct[i].{S[0]}, mf_struct[i].count_1_quant, mf_struct[i].sum_2_quant, mf_struct[i].max_3_quant); # replace quant handling here with proper variables
+            print("%s %d %d %d\\n", mf_struct[i].{S[0]}, mf_struct[i].count_1_quant, mf_struct[i].sum_2_quant, mf_struct[i].max_3_quant); # replace quant handling here with proper variables
     # TABLE SCAN 1: populate mf-struct with distinct values of grouping attribute (V)
     while True:
         if cur == -1: # i dont actually know how to check if the cursor's at the end of the table
@@ -74,7 +74,6 @@ def main(phi):
         
         cur.next() # move to the next row, check how to do that
 """
-    print(body)
     # Note: The f allows formatting with variables.
     #       Also, note the indentation is preserved.
     tmp = f"""

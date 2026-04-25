@@ -21,10 +21,83 @@ def query():
     
     _global = []
     
-    for row in cur:
-        if row['quant'] > 10:
-            _global.append(row)
+    class struct:
+        def __init__():
+            cust = [' '] * 50 # not entirely sure where this 50 comes from. also needs handling for multiple basic variables
+            q1_sum_quant = 0
+q2_sum_quant = 0
+q3_sum_quant = 0
+
+
+    mf_struct = struct()
+    NUM_OF_ENTRIES = 0
+
+    def lookup(cur_row):
+        for i in range(NUM_OF_ENTRIES):
+            if (mf_struct[i].cust == cur_row.cust):
+                return i
+        return -1
+
+    def add(cur_row):
+        mf_struct[NUM_OF_ENTRIES].cust = cur_row.cust
+        # add handling here for the various quants
+        NUM_OF_ENTRIES = NUM_OF_ENTRIES + 1
+
+    def output():
+        print(". . . . .\n"); # header of the output (from operand S)
+        for i in range(NUM_OF_ENTRIES):
+            print("%s %d %d %d\n", mf_struct[i].cust, mf_struct[i].count_1_quant, mf_struct[i].sum_2_quant, mf_struct[i].max_3_quant); # replace quant handling here with proper variables
+    # TABLE SCAN 1: populate mf-struct with distinct values of grouping attribute (V)
+    while True:
+        if cur == -1: # i dont actually know how to check if the cursor's at the end of the table
+            break
+        pos = lookup(cur)
+        if pos == -1:
+            add(cur)
+        cur.next() # move to the next row, check how to do that
     
+    while True:
+
+        if cur == -1: # i dont actually know how to check if the cursor's at the end of the table
+            break
+        if state=='NY':
+        
+            # look up current_row.cust in mf_struct
+            pos = lookup(cur, mf_struct)
+            # current_row.cust found in mf_struct
+
+            # handling for necessary quants (sum, max, min, avg, count)
+        
+        cur.next() # move to the next row, check how to do that
+
+    while True:
+
+        if cur == -1: # i dont actually know how to check if the cursor's at the end of the table
+            break
+        if state=='NJ':
+        
+            # look up current_row.cust in mf_struct
+            pos = lookup(cur, mf_struct)
+            # current_row.cust found in mf_struct
+
+            # handling for necessary quants (sum, max, min, avg, count)
+        
+        cur.next() # move to the next row, check how to do that
+
+    while True:
+
+        if cur == -1: # i dont actually know how to check if the cursor's at the end of the table
+            break
+        if state=='CT':
+        
+            # look up current_row.cust in mf_struct
+            pos = lookup(cur, mf_struct)
+            # current_row.cust found in mf_struct
+
+            # handling for necessary quants (sum, max, min, avg, count)
+        
+        cur.next() # move to the next row, check how to do that
+
     
     return tabulate.tabulate(_global,
                         headers="keys", tablefmt="psql")
