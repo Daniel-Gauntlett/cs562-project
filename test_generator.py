@@ -4,8 +4,6 @@ from parser import get_input_query
 
 from sql import query as sql
 
-
-def test_phi():
     
 
 def test_generator():

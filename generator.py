@@ -74,7 +74,7 @@ def main(phi):
         
         cur.next() # move to the next row, check how to do that
 """
-
+    print(body)
     # Note: The f allows formatting with variables.
     #       Also, note the indentation is preserved.
     tmp = f"""
