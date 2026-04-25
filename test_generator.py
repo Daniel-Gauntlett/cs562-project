@@ -1,13 +1,24 @@
 from generator import main as generator
 from _generated import query as _generated
+from parser import get_input_query
 
 from sql import query as sql
 
 
+def test_phi():
+    
+
 def test_generator():
+
     # Generate the file
-    generator()
+    generator(get_input_query())
 
     # Compare the output of your generated code to the output of the actual SQL query
     # Note: This only works for standard queries, not ESQL queries.
     assert _generated() == sql()
+
+def main():
+    print("Ran")
+    test_generator()
+
+main()

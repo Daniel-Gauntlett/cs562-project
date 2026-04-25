@@ -22,6 +22,8 @@ def main(phi):
     for i in range(n):
         groupingvars = groupingvars + f"{S[i - n]} = 0\n"
 
+    print(groupingvars)
+
     body = f"""
     class struct:
         def __init__():
