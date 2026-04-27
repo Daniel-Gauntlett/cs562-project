@@ -18,61 +18,83 @@ def main(phi):
     FVECT = phi[3]
     PRED_LIST = phi[4]
     HAVING = phi[5]
-    groupingvars = ""
-    for i in range(n):
-        groupingvars = groupingvars + f"{S[i - n]} = 0\n"
 
-    print(groupingvars)
+    aggfuncs = ""
+    for i in range(len(FVECT)):
+        aggfuncs = aggfuncs + f"{FVECT[i]}: 0,\n"
+    print(aggfuncs)
+    
+    groupingattrs = ""
+    for i in range(len(V)):
+        groupingattrs = groupingattrs + f"\"{V[i]}\": "",\n"
+    
+    groupadd = ""
+    for i in range(len(V)):
+        groupadd = groupadd + f"newrow[\"{V[i]}\"] = cur[\"{V[i]}\"]\n"
+    
+    outputlist = ""
+    outputstring = ""
+    for i in range(len(S)):
+        outputlist = outputlist + "mf_struct[i][\"" + S[i] + "\"], "
+        if S[i] in FVECT:
+            outputstring = outputstring + "%d\t"
+        else:
+            outputstring = outputstring + "%s\t"
+    
+    lookupcondition = []
+    for i in range(len(V)):
+        lookupcondition.append(f"mf_struct[i][\"{V[i]}\"] == cur[\"{V[i]}\"]")
+    lookupcondition = " and ".join(lookupcondition)
+    
+    processgroupvars = ""
+    for i in range(n):
+        processgroupvars = processgroupvars + f"""
+    for row in table:
+        if {PRED_LIST[i]}: # unsure if this matches, just going w/ it for now
+            pos = lookup(row)
+            if pos != -1:
+                mf_struct[pos][\"{FVECT[i]}\"] += 1 # this is just sum
+    """
+
 
     body = f"""
-    class struct:
-        def __init__():
-            {S[0]} = [' '] * 50 # not entirely sure where this 50 comes from. also needs handling for multiple basic variables
-            {groupingvars}
-
-    mf_struct = struct()
+    def row():
+        # max should be initialized as -1 instead of 0
+        return {{
+            {groupingattrs}
+            {aggfuncs}
+        }}
+    mf_struct = []
     NUM_OF_ENTRIES = 0
 
     def lookup(cur_row):
         for i in range(NUM_OF_ENTRIES):
-            if (mf_struct[i].{S[0]} == cur_row.{S[0]}):
+            if ({lookupcondition}):
                 return i
         return -1
 
     def add(cur_row):
-        mf_struct[NUM_OF_ENTRIES].{S[0]} = cur_row.{S[0]}
-        # add handling here for the various quants
+        newrow = row()
+        {groupadd}
+        mf_struct.append(newrow)
         NUM_OF_ENTRIES = NUM_OF_ENTRIES + 1
 
     def output():
         print(". . . . .\\n"); # header of the output (from operand S)
         for i in range(NUM_OF_ENTRIES):
-            print("%s %d %d %d\\n", mf_struct[i].{S[0]}, mf_struct[i].count_1_quant, mf_struct[i].sum_2_quant, mf_struct[i].max_3_quant); # replace quant handling here with proper variables
-    # TABLE SCAN 1: populate mf-struct with distinct values of grouping attribute (V)
-    while True:
-        if cur == -1: # i dont actually know how to check if the cursor's at the end of the table
-            break
-        pos = lookup(cur)
+            print("{outputstring}\\n", {outputlist});
+    
+    # TABLE SCAN 1
+    table = cur.fetchall()
+    for row in table:
+        pos = lookup(row)
         if pos == -1:
-            add(cur)
-        cur.next() # move to the next row, check how to do that
-    """
+            add(row)
+    
+    {processgroupvars}        
 
-    for i in range(n):
-        body = body + f"""
-    while True:
+    output()
 
-        if cur == -1: # i dont actually know how to check if the cursor's at the end of the table
-            break
-        if {PRED_LIST[i]}:
-        
-            # look up current_row.cust in mf_struct
-            pos = lookup(cur, mf_struct)
-            # current_row.cust found in mf_struct
-
-            # handling for necessary quants (sum, max, min, avg, count)
-        
-        cur.next() # move to the next row, check how to do that
 """
     # Note: The f allows formatting with variables.
     #       Also, note the indentation is preserved.
