@@ -16,6 +16,11 @@ def editcondition(precond, cond, attrs):
 
 SCHEMA = ["cust", "prod", "day", "month", "year", "state", "quant", "date"]
 
+def getcol(agg):
+    for attr in SCHEMA:
+        if attr in agg:
+            return attr
+
 def main(phi):
     """
     This is the generator code. It should take in the MF structure and generate the code
@@ -65,18 +70,18 @@ def main(phi):
     for i in range(n):
         action = ""
         if "sum" in FVECT[i]:
-            action = action + f"mf_struct[pos][\"{FVECT[i]}\"] += 1\n"
+            action = action + f"mf_struct[pos][\"{FVECT[i]}\"] += row[\"{getcol(FVECT[i])}\"]\n"
         elif "avg" in FVECT[i]:
-            action = action + f"mf_struct[pos][\"{FVECT[i]}\"] += 1\n"
+            action = action + f"mf_struct[pos][\"{FVECT[i]}\"] += row[\"{getcol(FVECT[i])}\"]\n"
         elif "max" in FVECT[i]:
             action = action + f"""
-    if row["{FVECT[i]}"] > mf_struct[pos]["{FVECT[i]}"]:
-        mf_struct[pos]["{FVECT[i]}"] = row["{FVECT[i]}"]
+    if row[\"{getcol(FVECT[i])}\"] > mf_struct[pos][\"{FVECT[i]}\"]:
+        mf_struct[pos][\"{FVECT[i]}\"] = row[\"{getcol(FVECT[i])}\"]
     """
         elif "min" in FVECT[i]:
             action = action + f"""
-    if row["{FVECT[i]}"] < mf_struct[pos]["{FVECT[i]}"]:
-        mf_struct[pos]["{FVECT[i]}"] = row["{FVECT[i]}"]
+    if row[\"{getcol(FVECT[i])}\"] < mf_struct[pos][\"{FVECT[i]}\"]:
+        mf_struct[pos][\"{FVECT[i]}\"] = row[\"{getcol(FVECT[i])}\"]
     """
 
         processgroupvars = processgroupvars + f"""
