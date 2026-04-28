@@ -1,17 +1,31 @@
-import subprocess
+import subprocess, parser
 
 # Stuff up here is being put in python format for generation
 
-            
+def editcondition(precond, cond, attrs):
+    havingcond = "" 
+    havinglist = cond.split(" ")
+    for i in range(len(havinglist)):
+        if havinglist[i] in attrs:
+            havingcond = havingcond + f"{precond}[\"{havinglist[i]}\"] "
+        else:
+            havingcond = havingcond + havinglist[i] + " "
+    havingcond = havingcond.strip()
+    return havingcond
 
+
+SCHEMA = ["cust", "prod", "day", "month", "year", "state", "quant", "date"]
 
 def main(phi):
-
     """
     This is the generator code. It should take in the MF structure and generate the code
     needed to run the query. That generated code should be saved to a 
     file (e.g. _generated.py) and then run.
     """
+    for x in range(len(phi)):
+        if type(phi[x]) == list:
+            for y in range(len(phi[x])):
+                phi[x][y] = phi[x][y].strip()
     S = phi[0]
     n = phi[1]
     V = phi[2]
@@ -19,18 +33,19 @@ def main(phi):
     PRED_LIST = phi[4]
     HAVING = phi[5]
 
+    havingcond = editcondition("mf_struct[i]", HAVING, V + FVECT)
+
     aggfuncs = ""
     for i in range(len(FVECT)):
-        aggfuncs = aggfuncs + f"{FVECT[i]}: 0,\n"
-    print(aggfuncs)
+        aggfuncs = aggfuncs + f"\"{FVECT[i]}\": 0,\n           "
     
     groupingattrs = ""
     for i in range(len(V)):
-        groupingattrs = groupingattrs + f"\"{V[i]}\": "",\n"
+        groupingattrs = groupingattrs + f"\"{V[i]}\": \"\",\n           "
     
     groupadd = ""
     for i in range(len(V)):
-        groupadd = groupadd + f"newrow[\"{V[i]}\"] = cur[\"{V[i]}\"]\n"
+        groupadd = groupadd + f"newrow[\"{V[i]}\"] = cur_row[\"{V[i]}\"]\n"
     
     outputlist = ""
     outputstring = ""
@@ -43,17 +58,33 @@ def main(phi):
     
     lookupcondition = []
     for i in range(len(V)):
-        lookupcondition.append(f"mf_struct[i][\"{V[i]}\"] == cur[\"{V[i]}\"]")
+        lookupcondition.append(f"mf_struct[i][\"{V[i]}\"] == cur_row[\"{V[i]}\"]")
     lookupcondition = " and ".join(lookupcondition)
     
     processgroupvars = ""
     for i in range(n):
+        action = ""
+        if "sum" in FVECT[i]:
+            action = action + f"mf_struct[pos][\"{FVECT[i]}\"] += 1\n"
+        elif "avg" in FVECT[i]:
+            action = action + f"mf_struct[pos][\"{FVECT[i]}\"] += 1\n"
+        elif "max" in FVECT[i]:
+            action = action + f"""
+    if row["{FVECT[i]}"] > mf_struct[pos]["{FVECT[i]}"]:
+        mf_struct[pos]["{FVECT[i]}"] = row["{FVECT[i]}"]
+    """
+        elif "min" in FVECT[i]:
+            action = action + f"""
+    if row["{FVECT[i]}"] < mf_struct[pos]["{FVECT[i]}"]:
+        mf_struct[pos]["{FVECT[i]}"] = row["{FVECT[i]}"]
+    """
+
         processgroupvars = processgroupvars + f"""
     for row in table:
-        if {PRED_LIST[i]}: # unsure if this matches, just going w/ it for now
+        if {editcondition("row", PRED_LIST[i], SCHEMA)}:
             pos = lookup(row)
             if pos != -1:
-                mf_struct[pos][\"{FVECT[i]}\"] += 1 # this is just sum
+                {action}
     """
 
 
@@ -82,7 +113,8 @@ def main(phi):
     def output():
         print(". . . . .\\n"); # header of the output (from operand S)
         for i in range(NUM_OF_ENTRIES):
-            print("{outputstring}\\n", {outputlist});
+            if {havingcond}:
+                print("{outputstring}\\n", {outputlist});
     
     # TABLE SCAN 1
     table = cur.fetchall()
@@ -139,4 +171,5 @@ if "__main__" == __name__:
 
 
 if "__main__" == __name__:
-    main()
+    phi = parser.get_test_input_query()
+    main(phi)
