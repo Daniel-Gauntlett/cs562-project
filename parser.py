@@ -9,7 +9,15 @@ def prefixed_with_number(s):
 def add_equals(s):
     for i in range(len(s)):
         if s[i] == "=":
-            return s[:i] + "=" + s[i:]
+            if i >= 1:
+                if s[i-1] != " ":
+                    s = s[:(i-1)] + " " + s[(i-1):]
+                    continue
+            if i < len(s):
+                if s[i+1] != " ":
+                    return s[:i] + "= " + s[i:]
+                else:
+                    return s[:i] + "=" + s[i:]
     return s
 
 def process_stringlist(s):

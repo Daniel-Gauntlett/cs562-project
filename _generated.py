@@ -21,82 +21,72 @@ def query():
     
     _global = []
     
-    class struct:
-        def __init__():
-            cust = [' '] * 50 # not entirely sure where this 50 comes from. also needs handling for multiple basic variables
-            q1_sum_quant = 0
-q2_sum_quant = 0
-q3_sum_quant = 0
-
-
-    mf_struct = struct()
+    def row():
+        # max should be initialized as -1 instead of 0
+        return {
+            "cust": "",
+           
+            "q1_sum_quant": 0,
+           "q1_avg_quant": 0,
+           "q2_sum_quant": 0,
+           "q3_sum_quant": 0,
+           "q3_avg_quant": 0,
+           
+        }
+    mf_struct = []
     NUM_OF_ENTRIES = 0
 
     def lookup(cur_row):
         for i in range(NUM_OF_ENTRIES):
-            if (mf_struct[i].cust == cur_row.cust):
+            if (mf_struct[i]["cust"] == cur_row["cust"]):
                 return i
         return -1
 
     def add(cur_row):
-        mf_struct[NUM_OF_ENTRIES].cust = cur_row.cust
-        # add handling here for the various quants
+        newrow = row()
+        newrow["cust"] = cur_row["cust"]
+
+        mf_struct.append(newrow)
         NUM_OF_ENTRIES = NUM_OF_ENTRIES + 1
 
     def output():
         print(". . . . .\n"); # header of the output (from operand S)
         for i in range(NUM_OF_ENTRIES):
-            print("%s %d %d %d\n", mf_struct[i].cust, mf_struct[i].count_1_quant, mf_struct[i].sum_2_quant, mf_struct[i].max_3_quant); # replace quant handling here with proper variables
-    # TABLE SCAN 1: populate mf-struct with distinct values of grouping attribute (V)
-    while True:
-        if cur == -1: # i dont actually know how to check if the cursor's at the end of the table
-            break
-        pos = lookup(cur)
-        if pos == -1:
-            add(cur)
-        cur.next() # move to the next row, check how to do that
+            if mf_struct[i]["q1_sum_quant"] > 2 * mf_struct[i]["q2_sum_quant"] or mf_struct[i]["q1_avg_quant"] > mf_struct[i]["q3_avg_quant"]:
+                print("%s	%d	%d	%d	\n", mf_struct[i]["cust"], mf_struct[i]["q1_sum_quant"], mf_struct[i]["q2_sum_quant"], mf_struct[i]["q3_sum_quant"], );
     
-    while True:
+    # TABLE SCAN 1
+    table = cur.fetchall()
+    for row in table:
+        pos = lookup(row)
+        if pos == -1:
+            add(row)
+    
+    
+    for row in table:
+        if row["state"] == 'NY':
+            pos = lookup(row)
+            if pos != -1:
+                mf_struct[pos]["q1_sum_quant"] += row["quant"]
 
-        if cur == -1: # i dont actually know how to check if the cursor's at the end of the table
-            break
-        if state=='NY':
-        
-            # look up current_row.cust in mf_struct
-            pos = lookup(cur, mf_struct)
-            # current_row.cust found in mf_struct
+    
+    for row in table:
+        if row["state"] == 'NJ':
+            pos = lookup(row)
+            if pos != -1:
+                mf_struct[pos]["q1_avg_quant"] += row["quant"]
 
-            # handling for necessary quants (sum, max, min, avg, count)
-        
-        cur.next() # move to the next row, check how to do that
+    
+    for row in table:
+        if row["state"] == 'CT':
+            pos = lookup(row)
+            if pos != -1:
+                mf_struct[pos]["q2_sum_quant"] += row["quant"]
 
-    while True:
+            
 
-        if cur == -1: # i dont actually know how to check if the cursor's at the end of the table
-            break
-        if state=='NJ':
-        
-            # look up current_row.cust in mf_struct
-            pos = lookup(cur, mf_struct)
-            # current_row.cust found in mf_struct
+    output()
 
-            # handling for necessary quants (sum, max, min, avg, count)
-        
-        cur.next() # move to the next row, check how to do that
-
-    while True:
-
-        if cur == -1: # i dont actually know how to check if the cursor's at the end of the table
-            break
-        if state=='CT':
-        
-            # look up current_row.cust in mf_struct
-            pos = lookup(cur, mf_struct)
-            # current_row.cust found in mf_struct
-
-            # handling for necessary quants (sum, max, min, avg, count)
-        
-        cur.next() # move to the next row, check how to do that
 
     
     return tabulate.tabulate(_global,
