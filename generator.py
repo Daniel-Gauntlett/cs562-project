@@ -3,6 +3,8 @@ import subprocess, parser
 # Stuff up here is being put in python format for generation
 
 def editcondition(precond, cond, attrs):
+    if len(cond) == 0:
+        return "True"
     havingcond = "" 
     havinglist = cond.split(" ")
     for i in range(len(havinglist)):
@@ -17,9 +19,10 @@ def editcondition(precond, cond, attrs):
 SCHEMA = ["cust", "prod", "day", "month", "year", "state", "quant", "date"]
 
 def getcol(agg):
-    for attr in SCHEMA:
-        if attr in agg:
-            return attr
+    parts = agg.split("_")
+    col = parts[-1]
+    if agg == col:
+        return agg
 
 def main(phi):
     """
@@ -28,7 +31,7 @@ def main(phi):
     file (e.g. _generated.py) and then run.
     """
     for x in range(len(phi)):
-        if type(phi[x]) == list:
+        if isinstance(phi[x], list):
             for y in range(len(phi[x])):
                 phi[x][y] = phi[x][y].strip()
     S = phi[0]
@@ -37,12 +40,21 @@ def main(phi):
     FVECT = phi[3]
     PRED_LIST = phi[4]
     HAVING = phi[5]
-
-    havingcond = editcondition("mf_struct[i]", HAVING, V + FVECT)
+    if HAVING:
+        havingcond = editcondition("mf_struct[i]", HAVING, V + FVECT)
+    else:
+        havingcond = "True"
 
     aggfuncs = ""
     for i in range(len(FVECT)):
-        aggfuncs = aggfuncs + f"\"{FVECT[i]}\": 0,\n           "
+        if "sum" in FVECT[i]:
+            aggfuncs = aggfuncs + f"\"{FVECT[i]}\": 0,\n           "
+        elif "avg" in FVECT[i]:
+            aggfuncs = aggfuncs + f"\"{FVECT[i]}\": 0,\n           "
+        elif "max" in FVECT[i]:
+            aggfuncs = aggfuncs + f"\"{FVECT[i]}\": float(\"inf\"),\n           "
+        elif "min" in FVECT[i]:
+            aggfuncs = aggfuncs + f"\"{FVECT[i]}\": float(\"-inf\"),\n           "
     
     groupingattrs = ""
     for i in range(len(V)):
@@ -119,7 +131,7 @@ def output():
     print(". . . . .\\n"); # header of the output (from operand S)
     for i in range(NUM_OF_ENTRIES):
         if {havingcond}:
-            print("{outputstring}\\n", {outputlist});
+            print("{outputstring}\\n" % ({outputlist}));
 """
     body = f"""
     
@@ -162,7 +174,8 @@ def query():
     
     _global = []
     {body}
-    
+    cur.close()
+    conn.close()
     return tabulate.tabulate(_global,
                         headers="keys", tablefmt="psql")
 
@@ -174,11 +187,12 @@ if "__main__" == __name__:
     """
 
     # Write the generated code to a file
-    open("_generated.py", "w").write(tmp)
+    with open("_generated.py", "w") as f:
+        f.write(tmp)
     # Execute the generated code
     subprocess.run(["python", "_generated.py"])
 
 
 if "__main__" == __name__:
-    phi = parser.get_test_input_query()
+    phi = parser.get_input_query()
     main(phi)
