@@ -62,6 +62,8 @@ def get_input_query():
     
     return phi
 
+
+
 def get_test_input_query():
     query = [['cust', 'q1_sum_quant', 'q2_sum_quant', 'q3_sum_quant'], 3, ['cust'], ['q1_sum_quant', ' q1_avg_quant', ' q2_sum_quant', ' q3_sum_quant', ' q3_avg_quant'], ["state = 'NY'", "state = 'NJ'", "state = 'CT'"], 
     'q1_sum_quant > 2 * q2_sum_quant or q1_avg_quant > q3_avg_quant']
@@ -70,3 +72,6 @@ def get_test_input_query():
         query[4][i] = add_equals(query[4][i])
 
     return query
+
+def read_file_query():
+    pass
