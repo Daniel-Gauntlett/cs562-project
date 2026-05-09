@@ -221,5 +221,6 @@ if "__main__" == __name__:
 
 
 if "__main__" == __name__:
+    args = sys.argv[1:]
     phi = parser.read_file_query("test_query2.txt")
     main(phi)    

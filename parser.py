@@ -52,7 +52,7 @@ def get_input_query():
     fvect_str = input("F-VECT([F]):\n")
     fvect_str = process_stringlist(fvect_str)
 
-    condvect_str = []
+    condvect_str = ['']
     print("SELECT CONDITION-VECT([σ]):")
     for i in range(groupingNum):
         condvect_str += [add_equals(prefixed_with_number( input(str(i+1) + ". ").strip()))]
