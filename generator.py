@@ -156,7 +156,7 @@ def output():
     print(". . . . .\\n"); # header of the output (from operand S)
     for i in range(NUM_OF_ENTRIES):
         if {havingcond}:
-            print("{outputstring}\\n" % ({outputlist}));
+            print("{outputstring}\\n" % ({outputlist}))
 """
     body = f"""
     
