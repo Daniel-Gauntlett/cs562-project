@@ -18,9 +18,11 @@ def get_new_row():
         "q1_sum_quant": 0,
         "q1_avg_quant": 0,
         "q2_sum_quant": 0,
+        "q2_avg_quant": 0,
         "q3_sum_quant": 0,
         "q3_avg_quant": 0,
         "q1_count_quant": 0,
+        "q2_count_quant": 0,
         "q3_count_quant": 0,
         
     }
@@ -42,7 +44,7 @@ def add(cur_row, mf_struct):
 def output():
     print(". . . . .\n"); # header of the output (from operand S)
     for i in range(NUM_OF_ENTRIES):
-        if mf_struct[i]["q1_sum_quant"] > 2 * mf_struct[i]["q2_sum_quant"] or mf_struct[i]["q1_avg_quant"] > mf_struct[i]["q3_avg_quant"]:
+        if mf_struct[i]["q1_avg_quant"] > mf_struct[i]["q2_avg_quant"] and mf_struct[i]["q2_avg_quant"] > mf_struct[i]["q3_avg_quant"]:
             print("%s	%s	%s	%s	\n" % (mf_struct[i]["cust"], mf_struct[i]["q1_sum_quant"], mf_struct[i]["q2_sum_quant"], mf_struct[i]["q3_sum_quant"], ));
 
 
@@ -64,7 +66,7 @@ def query():
     # TABLE SCAN 1
     table = cur.fetchall()
     columns = [desc[0] for desc in cur.description]
-    table = dict(zip(columns, table))
+    table = [dict(zip(columns, row)) for row in table]
     for row in table:
         pos = lookup(row)
         if pos == -1:
@@ -72,7 +74,7 @@ def query():
     
     
     for row in table:
-        if month = 1:
+        if row["month"] == 1:
             pos = lookup(row)
             if pos != -1:
                 mf_struct[pos]["q1_sum_quant"] += row["quant"]
@@ -80,14 +82,15 @@ def query():
                 
     
     for row in table:
-        if month = 2:
+        if row["month"] == 2:
             pos = lookup(row)
             if pos != -1:
                 mf_struct[pos]["q2_sum_quant"] += row["quant"]
+                mf_struct[pos]["q2_avg_quant"] += row["quant"]
                 
     
     for row in table:
-        if month = 3:
+        if row["month"] == 3:
             pos = lookup(row)
             if pos != -1:
                 mf_struct[pos]["q3_sum_quant"] += row["quant"]
@@ -98,6 +101,9 @@ def query():
         
         if mf_struct[i]["q1_count_quant"] != 0:
             mf_struct[i]["q1_avg_quant"] /= mf_struct[i]["q1_count_quant"]
+    
+        if mf_struct[i]["q2_count_quant"] != 0:
+            mf_struct[i]["q2_avg_quant"] /= mf_struct[i]["q2_count_quant"]
     
         if mf_struct[i]["q3_count_quant"] != 0:
             mf_struct[i]["q3_avg_quant"] /= mf_struct[i]["q3_count_quant"]

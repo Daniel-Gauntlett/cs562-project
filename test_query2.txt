@@ -1,0 +1,8 @@
+cust, 1_sum_quant, 2_sum_quant, 3_sum_quant
+3
+cust
+1_sum_quant, 1_avg_quant, 2_sum_quant, 2_avg_quant, 3_sum_quant, 3_avg_quant
+1.month=1
+2.month=2
+3.month=3
+q1_avg_quant > q2_avg_quant and q2_avg_quant > q3_avg_quant

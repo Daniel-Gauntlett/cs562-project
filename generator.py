@@ -163,7 +163,7 @@ def output():
     # TABLE SCAN 1
     table = cur.fetchall()
     columns = [desc[0] for desc in cur.description]
-    table = dict(zip(columns, table))
+    table = [dict(zip(columns, row)) for row in table]
     for row in table:
         pos = lookup(row)
         if pos == -1:
