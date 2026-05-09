@@ -51,8 +51,8 @@ def get_input_query():
     groupingAtt_str = process_stringlist(groupingAtt_str)
 
 
-    fvect_str = input("F-VECT([F]):\n").split(',')
-    groupingAtt_str = process_stringlist(fvect_str)
+    fvect_str = input("F-VECT([F]):\n")
+    fvect_str = process_stringlist(fvect_str)
 
     condvect_str = []
     print("SELECT CONDITION-VECT([σ]):")

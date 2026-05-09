@@ -82,10 +82,7 @@ def main(phi):
     outputstring = ""
     for i in range(len(S)):
         outputlist = outputlist + "mf_struct[i][\"" + S[i] + "\"], "
-        if S[i] in FVECT:
-            outputstring = outputstring + "%d\t"
-        else:
-            outputstring = outputstring + "%s\t"
+        outputstring = outputstring + "%s\t"
     
     lookupcondition = []
     for i in range(len(V)):
@@ -105,13 +102,13 @@ def main(phi):
                     action = action + f"mf_struct[pos][\"{j}\"] += 1\n                "
                 elif "max" in j:
                     action = action + f"""
-                if row[\"{getcol(FVECT[i])}\"] > mf_struct[pos][\"{FVECT[i]}\"]:
-                    mf_struct[pos][\"{FVECT[i]}\"] = row[\"{getcol(FVECT[i])}\"]
+                if row[\"{getcol(j)}\"] > mf_struct[pos][\"{j}\"]:
+                    mf_struct[pos][\"{j}\"] = row[\"{getcol(j)}\"]
                 """
                 elif "min" in j:
                     action = action + f"""
-                if row[\"{getcol(FVECT[i])}\"] < mf_struct[pos][\"{FVECT[i]}\"]:
-                    mf_struct[pos][\"{FVECT[i]}\"] = row[\"{getcol(FVECT[i])}\"]
+                if row[\"{getcol(j)}\"] < mf_struct[pos][\"{j}\"]:
+                    mf_struct[pos][\"{j}\"] = row[\"{getcol(j)}\"]
                 """
         if action == "":
             continue
@@ -165,6 +162,8 @@ def output():
     
     # TABLE SCAN 1
     table = cur.fetchall()
+    columns = [desc[0] for desc in cur.description]
+    table = dict(zip(columns, table))
     for row in table:
         pos = lookup(row)
         if pos == -1:
@@ -222,7 +221,7 @@ if "__main__" == __name__:
 
 
 if "__main__" == __name__:
-    # phi = parser.get_input_query()
-    # main(phi)
-    parser.read_file_query("test_query.txt")
+    phi = parser.get_test_input_query()
+    main(phi)
+    #parser.get_test_input_query()
     
