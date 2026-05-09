@@ -57,6 +57,7 @@ def get_input_query():
     for i in range(groupingNum):
         condvect_str += [add_equals(prefixed_with_number( input(str(i+1) + ". ").strip()))]
 
+    having_str = ""
     having_str = fix_having_prefixes( input("HAVING_CONDITION(G):\n").strip() )
 
     phi = [attribute_str,groupingNum,groupingAtt_str,fvect_str,condvect_str,having_str]
@@ -92,17 +93,22 @@ def read_file_query(file_path):
     i=4
     condvect_str = []
     while True:
+        if (len(file_query[4]) == 0):
+            i+=1
+            break
         if file_query[i][1] == '.' and file_query[i][0].isnumeric():
             condvect_str = file_query[i][2:(len(file_query[i]))]
             i+=1
         else:
             break
     
-    having_str = fix_having_prefixes(file_query[i].strip())
+    having_str = ""
+    if i < len(file_query):
+        if len(file_query[i].strip()) > 0:
+            having_str = fix_having_prefixes(file_query[i].strip())
 
     retval = [attribute_str,groupingNum,groupingAtt_str,fvect_str,condvect_str,having_str]
 
-    print(retval)
     return retval
 
 

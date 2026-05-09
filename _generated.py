@@ -76,7 +76,7 @@ def query():
     
     
     for row in table:
-        if row["month"] == 1:
+        if m:
             pos = lookup(row)
             if pos != -1:
                 mf_struct[pos]["q1_sum_quant"] += row["quant"]
@@ -84,7 +84,7 @@ def query():
                 
     
     for row in table:
-        if row["month"] == 2:
+        if o:
             pos = lookup(row)
             if pos != -1:
                 mf_struct[pos]["q2_sum_quant"] += row["quant"]
@@ -92,7 +92,7 @@ def query():
                 
     
     for row in table:
-        if row["month"] == 3:
+        if n:
             pos = lookup(row)
             if pos != -1:
                 mf_struct[pos]["q3_sum_quant"] += row["quant"]
