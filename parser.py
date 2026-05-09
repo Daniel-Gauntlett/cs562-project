@@ -8,14 +8,15 @@ def prefixed_with_number(s):
 
 def add_equals(s):
     for i in range(len(s)):
-        if s[i] == "=":
+        if s[i] == "=" or s[i] == ">" or s[i] == "<" or s[i] :
             if i >= 1:
                 if s[i-1] != " ":
                     s = s[:(i-1)] + " " + s[(i-1):]
-                    continue
             if i < len(s):
-                if s[i+1] != " ":
+                if s[i+1] != " " and s[i] == "=":
                     return s[:i] + "= " + s[i:]
+                elif s[i+1] != " " and s[i+1] == "=":
+                    return s[:i] + " " + s[i:]
                 else:
                     return s[:i] + "=" + s[i:]
     return s
@@ -36,7 +37,7 @@ def get_input_query():
     groupingNum = 0
     while True:
         groupingNum_str = input("NUMBER OF GROUPING VARIABLES(n):\n")
-        parse = re.findall('\d+',groupingNum_str)
+        parse = re.findall(r'\d+',groupingNum_str)
         if len(parse) > 0 and len(parse) < 2:
             groupingNum = int(parse[0])
             if groupingNum >= 0:
@@ -73,5 +74,13 @@ def get_test_input_query():
 
     return query
 
-def read_file_query():
-    pass
+def read_file_query(file_path):
+    file = open(file_path)
+    file_contents = file.read()
+
+    str_list = file_contents.split('\n')
+    aggregate = []
+    for i in range(0,len(str_list)):
+        aggregate += (str_list[i].split(' '))
+    print(aggregate)
+    print(len(aggregate))
