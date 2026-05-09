@@ -91,7 +91,7 @@ def read_file_query(file_path):
     fvect_str = process_stringlist(file_query[3])
 
     i=4
-    condvect_str = []
+    condvect_str = ['']
     while True:
         if (len(file_query[4]) == 0):
             i+=1

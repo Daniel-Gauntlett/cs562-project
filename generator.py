@@ -1,3 +1,6 @@
+# DB2 Final Project
+# Filip Sigda 20013812
+
 import subprocess, parser
 import sys
 import os
