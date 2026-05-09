@@ -2,7 +2,7 @@
 import re #for parsing numbers
 
 def prefixed_with_number(s):
-    if [0,1,2,3,4,5,6,7,8,9].contains( s.char_at(0) ):
+    if s[0] in ['0','1','2','3','4','5','6','7','8','9']:
         s = "q"+s
     return s
 
@@ -21,7 +21,7 @@ def add_equals(s):
     return s
 
 def process_stringlist(s):
-    s.split(',')
+    s = s.split(',')
     for i in range(len(s)):
         s[i] = s[i].strip()
         s[i] = prefixed_with_number(s[i])
@@ -65,7 +65,7 @@ def get_input_query():
 
 
 def get_test_input_query():
-    query = [['cust', 'q1_sum_quant', 'q2_sum_quant', 'q3_sum_quant'], 3, ['cust'], ['q1_sum_quant', ' q1_avg_quant', ' q2_sum_quant', ' q3_sum_quant', ' q3_avg_quant'], ["state = 'NY'", "state = 'NJ'", "state = 'CT'"], 
+    query = [['cust', 'q1_sum_quant', 'q2_sum_quant', 'q3_sum_quant'], 3, ['cust'], ['q1_sum_quant', ' q1_avg_quant', ' q2_sum_quant', ' q3_sum_quant', ' q3_avg_quant'], ["month = 1", "month = 2", "month = 3"], 
     'q1_sum_quant > 2 * q2_sum_quant or q1_avg_quant > q3_avg_quant']
 
     for i in range(len(query[4])):
