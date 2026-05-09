@@ -93,7 +93,7 @@ def read_file_query(file_path):
     condvect_str = ['']
     while True:
         if file_query[i][1] == '.' and file_query[i][0].isnumeric():
-            condvect_str = file_query[i][2:(len(file_query[i]))]
+            condvect_str.append(file_query[i][2:(len(file_query[i]))])
             i+=1
         else:
             break
