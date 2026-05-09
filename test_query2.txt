@@ -1,6 +1,6 @@
-cust, 1_sum_quant, 2_sum_quant, 3_sum_quant
+cust, year, 1_sum_quant, 2_sum_quant, 3_sum_quant
 3
-cust
+cust, year
 1_sum_quant, 1_avg_quant, 2_sum_quant, 2_avg_quant, 3_sum_quant, 3_avg_quant
 1.month=1
 2.month=2

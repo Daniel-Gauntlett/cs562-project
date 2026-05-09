@@ -72,11 +72,11 @@ def main(phi):
     FVECT = FVECT + added_vects
     groupingattrs = ""
     for i in range(len(V)):
-        groupingattrs = groupingattrs + f"\"{V[i]}\": \"\",\n           "
+        groupingattrs = groupingattrs + f"\"{V[i]}\": \"\",\n        "
     
     groupadd = ""
     for i in range(len(V)):
-        groupadd = groupadd + f"newrow[\"{V[i]}\"] = cur_row[\"{V[i]}\"]\n"
+        groupadd = groupadd + f"newrow[\"{V[i]}\"] = cur_row[\"{V[i]}\"]\n    "
     
     outputlist = ""
     outputstring = ""
