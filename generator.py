@@ -19,10 +19,8 @@ def editcondition(precond, cond, attrs):
 SCHEMA = ["cust", "prod", "day", "month", "year", "state", "quant", "date"]
 
 def getcol(agg):
-    parts = agg.split("_")
-    col = parts[-1]
-    if agg == col:
-        return agg
+    part = agg.split("_")[-1]
+    return part
 
 def main(phi):
     """
@@ -46,16 +44,32 @@ def main(phi):
         havingcond = "True"
 
     aggfuncs = ""
+    fvects = {}
+    avg_pairs = []
+    added_vects = []
     for i in range(len(FVECT)):
         if "sum" in FVECT[i]:
-            aggfuncs = aggfuncs + f"\"{FVECT[i]}\": 0,\n           "
+            aggfuncs = aggfuncs + f"\"{FVECT[i]}\": 0,\n        "
+        elif "count" in FVECT[i]:
+            aggfuncs = aggfuncs + f"\"{FVECT[i]}\": 0,\n        "
         elif "avg" in FVECT[i]:
-            aggfuncs = aggfuncs + f"\"{FVECT[i]}\": 0,\n           "
+            aggfuncs = aggfuncs + f"\"{FVECT[i]}\": 0,\n        "
+            splitfunc = FVECT[i].split("_")
+            countfunc = splitfunc[0] + "_" + "count" + "_" + splitfunc[2]
+            if countfunc not in FVECT:
+                added_vects.append(countfunc)
+            avg_pairs.append((FVECT[i], countfunc))
         elif "max" in FVECT[i]:
-            aggfuncs = aggfuncs + f"\"{FVECT[i]}\": float(\"inf\"),\n           "
+            aggfuncs = aggfuncs + f"\"{FVECT[i]}\": float(\"-inf\"),\n        "
         elif "min" in FVECT[i]:
-            aggfuncs = aggfuncs + f"\"{FVECT[i]}\": float(\"-inf\"),\n           "
-    
+            aggfuncs = aggfuncs + f"\"{FVECT[i]}\": float(\"inf\"),\n        "
+        num = FVECT[i].split("_")[0]
+        if num not in fvects:
+            fvects[num] = []
+        fvects[num].append(FVECT[i])
+    for vect in added_vects:
+        aggfuncs = aggfuncs + f"\"{vect}\": 0,\n        "
+    FVECT = FVECT + added_vects
     groupingattrs = ""
     for i in range(len(V)):
         groupingattrs = groupingattrs + f"\"{V[i]}\": \"\",\n           "
@@ -81,27 +95,41 @@ def main(phi):
     processgroupvars = ""
     for i in range(n):
         action = ""
-        if "sum" in FVECT[i]:
-            action = action + f"mf_struct[pos][\"{FVECT[i]}\"] += row[\"{getcol(FVECT[i])}\"]\n"
-        elif "avg" in FVECT[i]:
-            action = action + f"mf_struct[pos][\"{FVECT[i]}\"] += row[\"{getcol(FVECT[i])}\"]\n"
-        elif "max" in FVECT[i]:
-            action = action + f"""
-    if row[\"{getcol(FVECT[i])}\"] > mf_struct[pos][\"{FVECT[i]}\"]:
-        mf_struct[pos][\"{FVECT[i]}\"] = row[\"{getcol(FVECT[i])}\"]
-    """
-        elif "min" in FVECT[i]:
-            action = action + f"""
-    if row[\"{getcol(FVECT[i])}\"] < mf_struct[pos][\"{FVECT[i]}\"]:
-        mf_struct[pos][\"{FVECT[i]}\"] = row[\"{getcol(FVECT[i])}\"]
-    """
-
+        if "q" + str(i+1) in fvects:
+            for j in fvects["q" + str(i+1)]:
+                if "sum" in j:
+                    action = action + f"mf_struct[pos][\"{j}\"] += row[\"{getcol(j)}\"]\n                "
+                elif "avg" in j:
+                    action = action + f"mf_struct[pos][\"{j}\"] += row[\"{getcol(j)}\"]\n                "
+                elif "count" in j:
+                    action = action + f"mf_struct[pos][\"{j}\"] += 1\n                "
+                elif "max" in j:
+                    action = action + f"""
+                if row[\"{getcol(FVECT[i])}\"] > mf_struct[pos][\"{FVECT[i]}\"]:
+                    mf_struct[pos][\"{FVECT[i]}\"] = row[\"{getcol(FVECT[i])}\"]
+                """
+                elif "min" in j:
+                    action = action + f"""
+                if row[\"{getcol(FVECT[i])}\"] < mf_struct[pos][\"{FVECT[i]}\"]:
+                    mf_struct[pos][\"{FVECT[i]}\"] = row[\"{getcol(FVECT[i])}\"]
+                """
+        if action == "":
+            continue
         processgroupvars = processgroupvars + f"""
     for row in table:
         if {editcondition("row", PRED_LIST[i], SCHEMA)}:
             pos = lookup(row)
             if pos != -1:
                 {action}
+    """
+    if avg_pairs != []:
+         processgroupvars = processgroupvars + f"""
+    for i in range(NUM_OF_ENTRIES):
+        """
+    for avg_pair in avg_pairs:
+        processgroupvars = processgroupvars + f"""
+        if mf_struct[i][\"{avg_pair[1]}\"] != 0:
+            mf_struct[i][\"{avg_pair[0]}\"] /= mf_struct[i][\"{avg_pair[1]}\"]
     """
 
     methods = f"""

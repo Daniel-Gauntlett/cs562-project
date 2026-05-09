@@ -16,11 +16,13 @@ def get_new_row():
         "cust": "",
            
         "q1_sum_quant": 0,
-           "q1_avg_quant": 0,
-           "q2_sum_quant": 0,
-           "q3_sum_quant": 0,
-           "q3_avg_quant": 0,
-           
+        "q1_avg_quant": 0,
+        "q2_sum_quant": 0,
+        "q3_sum_quant": 0,
+        "q3_avg_quant": 0,
+        "q1_count_quant": 0,
+        "q3_count_quant": 0,
+        
     }
 
 def lookup(cur_row):
@@ -68,31 +70,42 @@ def query():
     
     
     for row in table:
-        if row["state"] == 'NY':
+        if row["month"] == 1:
             pos = lookup(row)
             if pos != -1:
                 mf_struct[pos]["q1_sum_quant"] += row["quant"]
-
-    
-    for row in table:
-        if row["state"] == 'NJ':
-            pos = lookup(row)
-            if pos != -1:
                 mf_struct[pos]["q1_avg_quant"] += row["quant"]
-
+                
     
     for row in table:
-        if row["state"] == 'CT':
+        if row["month"] == 2:
             pos = lookup(row)
             if pos != -1:
                 mf_struct[pos]["q2_sum_quant"] += row["quant"]
-
+                
+    
+    for row in table:
+        if row["month"] == 3:
+            pos = lookup(row)
+            if pos != -1:
+                mf_struct[pos]["q3_sum_quant"] += row["quant"]
+                mf_struct[pos]["q3_avg_quant"] += row["quant"]
+                
+    
+    for i in range(NUM_OF_ENTRIES):
+        
+        if mf_struct[i]["q1_count_quant"] != 0:
+            mf_struct[i]["q1_avg_quant"] /= mf_struct[i]["q1_count_quant"]
+    
+        if mf_struct[i]["q3_count_quant"] != 0:
+            mf_struct[i]["q3_avg_quant"] /= mf_struct[i]["q3_count_quant"]
             
 
     output()
 
 
-    
+    cur.close()
+    conn.close()
     return tabulate.tabulate(_global,
                         headers="keys", tablefmt="psql")
 
