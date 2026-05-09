@@ -226,8 +226,10 @@ if "__main__" == __name__:
     args = sys.argv[1:]
     phi = []
     if len(args) > 0:
-        os.path.exists(args[1])
-        phi = parser.read_file_query("test_query2.txt")
+        if os.path.exists(args[0]):
+            phi = parser.read_file_query(args[0])
+        else:
+            phi = parser.get_input_query()
     else:
         phi = parser.get_input_query()
     main(phi)    
