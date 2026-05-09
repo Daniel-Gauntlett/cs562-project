@@ -48,7 +48,7 @@ def get_input_query():
     groupingAtt_str = input("GROUPING ATTRIBUTES(V):\n")
     groupingAtt_str = process_stringlist(groupingAtt_str)
 
-
+    #fvect conditions
     fvect_str = input("F-VECT([F]):\n")
     fvect_str = process_stringlist(fvect_str)
 
@@ -57,7 +57,7 @@ def get_input_query():
     for i in range(groupingNum):
         condvect_str += [add_equals(prefixed_with_number( input(str(i+1) + ". ").strip()))]
 
-    having_str = input("HAVING_CONDITION(G):\n").strip()
+    having_str = fix_having_prefixes( input("HAVING_CONDITION(G):\n").strip() )
 
     phi = [attribute_str,groupingNum,groupingAtt_str,fvect_str,condvect_str,having_str]
     
@@ -87,8 +87,32 @@ def read_file_query(file_path):
 
     groupingAtt_str = process_stringlist(file_query[2])
 
-    fvect_str = ""
+    fvect_str = process_stringlist(file_query[3])
+
+    i=4
+    condvect_str = []
+    while True:
+        if file_query[i][1] == '.' and file_query[i][0].isnumeric():
+            condvect_str = file_query[i][2:(len(file_query[i]))]
+            i+=1
+        else:
+            break
     
-    print(groupingNum)
-    print(len(file_query))
-    
+    having_str = fix_having_prefixes(file_query[i].strip())
+
+    retval = [attribute_str,groupingNum,groupingAtt_str,fvect_str,condvect_str,having_str]
+
+    print(retval)
+    return retval
+
+
+#prevents number_prefixed variables in having condition
+def fix_having_prefixes(str):
+    for i in range(0,len(str)-1):
+        if str[i].isnumeric() and str[i+1] != ' ' and not str[i+1].isnumeric():
+            if i == 0:
+                str = 'q' + str
+            else:
+                if str[i-1] == ' ':
+                    str = str[:i] + 'q' + str[i:]
+    return str
