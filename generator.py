@@ -222,6 +222,7 @@ if "__main__" == __name__:
 
 
 if "__main__" == __name__:
-    phi = parser.get_input_query()
-    main(phi)
+    # phi = parser.get_input_query()
+    # main(phi)
+    parser.read_file_query("test_query.txt")
     
