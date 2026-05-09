@@ -8,7 +8,7 @@ def prefixed_with_number(s):
 
 def add_equals(s):
     for i in range(len(s)):
-        if s[i] == "=" or s[i] == ">" or s[i] == "<" or s[i] :
+        if s[i] == "=" or s[i] == ">" or s[i] == "<" or s[i] == '!':
             if i >= 1:
                 if s[i-1] != " ":
                     s = s[:(i-1)] + " " + s[(i-1):]
@@ -32,8 +32,6 @@ def get_input_query():
     # attributes
     attribute_str = input("SELECT ATTRIBUTE(S):\n")
     attribute_str = process_stringlist(attribute_str)
-
-    print(attribute_str)
 
     #loop for input validation
     groupingNum = 0
@@ -80,84 +78,17 @@ def read_file_query(file_path):
     file = open(file_path)
     file_contents = file.read()
 
-    # split the file into each word
-    str_list = file_contents.split('\n')
-    aggregate = []
-    for i in range(0,len(str_list)):
-        aggregate += (str_list[i].split(' '))
+    #split each into input
+    file_query = file_contents.split('\n')
+
+    attribute_str = process_stringlist(file_query[0])
+
+    groupingNum = int(file_query[1])
+
+    groupingAtt_str = process_stringlist(file_query[2])
+
+    fvect_str = ""
     
-    #remove extra characters
-    for i in range(0,len(aggregate)):
-        replacable_chars = [',',';',' ']
-        for char in replacable_chars:
-            aggregate[i] = aggregate[i].replace(char,'')
+    print(groupingNum)
+    print(len(file_query))
     
-    # check for select at start
-    if aggregate[0] != 'select':
-        print("select not found")
-        return 
-    
-    #generate lists from the contents of the file
-
-    select_list = []
-    from_list = []
-    group_by_list = []
-    such_that_list = []
-    having_list = []
-    parsing_mode = 'select'
-    groupby_satisfied = False
-    suchthat_satisfied = False
-    for i in range(1,len(aggregate)):
-        #parse all the select items
-        if parsing_mode == 'select':
-            if aggregate[i] == 'from':
-                parsing_mode = 'from'
-                continue
-
-            select_list.append(aggregate[i])
-
-        #parse all the from items
-        if parsing_mode == 'from':
-            if aggregate[i] == 'group' and aggregate[i+1] == 'by':
-                parsing_mode = 'groupby'
-                continue
-            
-            from_list.append(aggregate[i])
-
-        #parse all the groupby items
-        if parsing_mode == 'groupby':
-            # accounts for the by in group by
-            if aggregate[i] == 'by' and not groupby_satisfied:
-                groupby_satisfied = True
-                continue
-
-            if aggregate[i] == 'such' and aggregate[i+1] == 'that':
-                parsing_mode = 'suchthat'
-                continue
-            
-            group_by_list.append(aggregate[i])
-
-        #parse all suchthat items
-        if parsing_mode == 'suchthat':
-            # account for the that in such that
-            if aggregate[i] == 'that' and not suchthat_satisfied:
-                suchthat_satisfied = True
-                continue
-
-            if aggregate[i] == 'having':
-                parsing_mode = 'having'
-                continue
-
-            such_that_list.append(aggregate[i])
-
-        #parse all having items
-        if parsing_mode == 'having':
-            if aggregate[i] == 'having':
-                parsing_mode = 'having'
-                continue
-            
-            having_list.append(aggregate[i])
-
-        
-    print(group_by_list)
-    print(len(group_by_list))
