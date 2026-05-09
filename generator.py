@@ -7,7 +7,11 @@ import os
 
 # Stuff up here is being put in python format for generation
 
+# 
 def editcondition(precond, cond, attrs):
+    """
+    Takes a dictionary, a condition that is supposed to pull from that dictionary, and the list of possible keys for the dictionary and edits the condition to be correctly executed.
+    """
     if len(cond) == 0:
         return "True"
     havingcond = "" 
@@ -20,29 +24,36 @@ def editcondition(precond, cond, attrs):
     havingcond = havingcond.strip()
     return havingcond
 
-
+# This schema is used specifically for editcondition above
 SCHEMA = ["cust", "prod", "day", "month", "year", "state", "quant", "date"]
 
+# Gets the column name used in the aggregate variable
 def getcol(agg):
+    """
+    Takes in an aggregate variable name and returns the name of the column being aggregated.
+    """
     part = agg.split("_")[-1]
     return part
 
 def main(phi):
     """
     This is the generator code. It should take in the MF structure and generate the code
-    needed to run the query. That generated code should be saved to a 
+    needed to run the query. That generated code is saved to a 
     file (e.g. _generated.py) and then run.
     """
+    # Strip values
     for x in range(len(phi)):
         if isinstance(phi[x], list):
             for y in range(len(phi[x])):
                 phi[x][y] = phi[x][y].strip()
+                # Save each
     S = phi[0]
     n = phi[1]
     V = phi[2]
     FVECT = phi[3]
     PRED_LIST = phi[4]
     HAVING = phi[5]
+    # Ensure HAVING is a valid condition that can be called
     if HAVING:
         havingcond = editcondition("mf_struct[i]", HAVING, V + FVECT)
     else:
@@ -52,6 +63,7 @@ def main(phi):
     fvects = {}
     avg_pairs = []
     added_vects = []
+    # Firstly, define what an empty row needs to contain. If average is included, also add count.
     for i in range(len(FVECT)):
         if "sum" in FVECT[i]:
             aggfuncs = aggfuncs + f"\"{FVECT[i]}\": 0,\n        "
@@ -72,6 +84,7 @@ def main(phi):
         if num not in fvects:
             fvects[num] = []
         fvects[num].append(FVECT[i])
+    # For any added counts from average, ensure they are also initialized
     for vect in added_vects:
         aggfuncs = aggfuncs + f"\"{vect}\": 0,\n        "
     FVECT = FVECT + added_vects
@@ -87,6 +100,7 @@ def main(phi):
     outputstring = ""
     for i in range(len(S)):
         outputlist = outputlist + "mf_struct[i][\"" + S[i] + "\"], "
+        # in Python, you can %s even numerical datatypes and it will auto convert to string; relevant for averages which may not be integers
         outputstring = outputstring + "%s\t"
     
     lookupcondition = []
@@ -94,6 +108,7 @@ def main(phi):
         lookupcondition.append(f"mf_struct[i][\"{V[i]}\"] == cur_row[\"{V[i]}\"]")
     lookupcondition = " and ".join(lookupcondition)
     
+    # Define what needs to happen every loop for each condition
     processgroupvars = ""
     for i in range(n):
         action = ""
@@ -117,6 +132,7 @@ def main(phi):
                 """
         if action == "":
             continue
+        # Add the general loop structure
         processgroupvars = processgroupvars + f"""
     for row in table:
         if {editcondition("row", PRED_LIST[i], SCHEMA)}:
@@ -133,7 +149,7 @@ def main(phi):
         if mf_struct[i][\"{avg_pair[1]}\"] != 0:
             mf_struct[i][\"{avg_pair[0]}\"] /= mf_struct[i][\"{avg_pair[1]}\"]
     """
-
+    # define each of the methods one by one
     methods = f"""
 mf_struct = []
 NUM_OF_ENTRIES = 0
@@ -163,6 +179,8 @@ def output():
         if {havingcond}:
             print("{outputstring}\\n" % ({outputlist}))
 """
+    
+    # base logic
     body = f"""
     
     # TABLE SCAN 1
@@ -179,8 +197,7 @@ def output():
     output()
 
 """
-    # Note: The f allows formatting with variables.
-    #       Also, note the indentation is preserved.
+    # Note: Overall wrapper
     tmp = f"""
 import os
 import psycopg2

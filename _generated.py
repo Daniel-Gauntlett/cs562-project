@@ -13,28 +13,27 @@ NUM_OF_ENTRIES = 0
 def get_new_row():
     # max should be initialized as -1 instead of 0
     return {
-        "cust": "",
+        "year": "",
+        "prod": "",
         
-        "q1_sum_quant": 0,
+        "q1_max_quant": float("-inf"),
+        "q1_min_quant": float("inf"),
         "q1_avg_quant": 0,
-        "q2_sum_quant": 0,
-        "q3_sum_quant": 0,
-        "q3_avg_quant": 0,
         "q1_count_quant": 0,
-        "q3_count_quant": 0,
         
     }
 
 def lookup(cur_row):
     for i in range(NUM_OF_ENTRIES):
-        if (mf_struct[i]["cust"] == cur_row["cust"]):
+        if (mf_struct[i]["year"] == cur_row["year"] and mf_struct[i]["prod"] == cur_row["prod"]):
             return i
     return -1
 
 def add(cur_row, mf_struct):
     global NUM_OF_ENTRIES
     newrow = get_new_row()
-    newrow["cust"] = cur_row["cust"]
+    newrow["year"] = cur_row["year"]
+    newrow["prod"] = cur_row["prod"]
     
     mf_struct.append(newrow)
     NUM_OF_ENTRIES = NUM_OF_ENTRIES + 1
@@ -42,8 +41,8 @@ def add(cur_row, mf_struct):
 def output():
     print(". . . . .\n"); # header of the output (from operand S)
     for i in range(NUM_OF_ENTRIES):
-        if mf_struct[i]["q1_sum_quant"] > 2 * mf_struct[i]["q2_sum_quant"] or mf_struct[i]["q1_avg_quant"] > mf_struct[i]["q3_avg_quant"]:
-            print("%s	%s	%s	%s	\n" % (mf_struct[i]["cust"], mf_struct[i]["q1_sum_quant"], mf_struct[i]["q2_sum_quant"], mf_struct[i]["q3_sum_quant"], ))
+        if mf_struct[i]["q1_count_quant"] >= 1:
+            print("%s	%s	%s	%s	%s	%s	\n" % (mf_struct[i]["year"], mf_struct[i]["prod"], mf_struct[i]["q1_max_quant"], mf_struct[i]["q1_min_quant"], mf_struct[i]["q1_avg_quant"], mf_struct[i]["q1_count_quant"], ))
 
 
 def query():
@@ -72,35 +71,23 @@ def query():
     
     
     for row in table:
-        if s:
+        if True:
             pos = lookup(row)
             if pos != -1:
-                mf_struct[pos]["q1_sum_quant"] += row["quant"]
+                
+                if row["quant"] > mf_struct[pos]["q1_max_quant"]:
+                    mf_struct[pos]["q1_max_quant"] = row["quant"]
+                
+                if row["quant"] < mf_struct[pos]["q1_min_quant"]:
+                    mf_struct[pos]["q1_min_quant"] = row["quant"]
                 mf_struct[pos]["q1_avg_quant"] += row["quant"]
-                
-    
-    for row in table:
-        if t:
-            pos = lookup(row)
-            if pos != -1:
-                mf_struct[pos]["q2_sum_quant"] += row["quant"]
-                
-    
-    for row in table:
-        if a:
-            pos = lookup(row)
-            if pos != -1:
-                mf_struct[pos]["q3_sum_quant"] += row["quant"]
-                mf_struct[pos]["q3_avg_quant"] += row["quant"]
+                mf_struct[pos]["q1_count_quant"] += 1
                 
     
     for i in range(NUM_OF_ENTRIES):
         
         if mf_struct[i]["q1_count_quant"] != 0:
             mf_struct[i]["q1_avg_quant"] /= mf_struct[i]["q1_count_quant"]
-    
-        if mf_struct[i]["q3_count_quant"] != 0:
-            mf_struct[i]["q3_avg_quant"] /= mf_struct[i]["q3_count_quant"]
             
 
     output()

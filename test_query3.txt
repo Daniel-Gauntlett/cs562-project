@@ -1,6 +1,6 @@
-year, product, 1_max_quant, 1_min_quant, 1_avg_quant, 1_count_quant
+year, prod, 1_max_quant, 1_min_quant, 1_avg_quant, 1_count_quant
 1
-year, product
+year, prod
 1_max_quant, 1_min_quant, 1_avg_quant, 1_count_quant
 
-1_count_quant >= 10
+1_count_quant >= 1
