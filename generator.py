@@ -1,4 +1,6 @@
 import subprocess, parser
+import sys
+import os
 
 # Stuff up here is being put in python format for generation
 
@@ -222,5 +224,10 @@ if "__main__" == __name__:
 
 if "__main__" == __name__:
     args = sys.argv[1:]
-    phi = parser.read_file_query("test_query2.txt")
+    phi = []
+    if len(args) > 0:
+        os.path.exists(args[1])
+        phi = parser.read_file_query("test_query2.txt")
+    else:
+        phi = parser.get_input_query()
     main(phi)    
